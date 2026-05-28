@@ -1,7 +1,10 @@
-#define GL_SILENCE_DEPRECATION
+#define STBI_NO_THREAD_LOCALS
 
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "stb_image.h"
+
+#include <cmath>
 
 //#include <GL/freeglut.h>//nur windows 
 
@@ -15,6 +18,25 @@
 
 GLuint tex;
 
+//rotozoom
+float t = 0.0f;
+
+void rotoTextCoord(float x, float y)
+{
+	float angle = t * 0.01f;
+	float zoom = 0.8f + 0.4f * sinf(t * 0.015f);
+
+	float cx = 0.5f + 0.25f * sinf(t * 0.008f);
+	float cy = 0.5f + 0.25f * cosf(t * 0.011f);
+
+	float ca = cosf(angle);
+	float sa = sinf(angle);
+
+	float u = cx + (x * ca - y * sa) * zoom;
+	float v = cy + (x * sa + y * ca) * zoom;
+	glTexCoord2f(u, v);
+}
+
 void draw()
 {
 
@@ -27,16 +49,17 @@ void draw()
 	glColor3f(1, 1, 1);
 
 	glBegin(GL_QUADS);//quadrat positionen
-		glTexCoord2f(0, 1); glVertex2f(-1, -1);
-		glTexCoord2f(1, 1); glVertex2f(1, -1);
-		glTexCoord2f(1, 0); glVertex2f(1, 1);
-		glTexCoord2f(0, 0); glVertex2f(-1, 1);
+		rotoTextCoord(-0.5f,  0.5f); glVertex2f(-1, -1);
+		rotoTextCoord( 0.5f,  0.5f); glVertex2f(1, -1);
+		rotoTextCoord( 0.5f, -0.5f); glVertex2f(1, 1);
+		rotoTextCoord(-0.5f, -0.5f); glVertex2f(-1, 1);
 	glEnd();
 
+	t += 1.0f;
 	glutSwapBuffers();
 }
 
-void key(unsigned char k, int x, int y)
+void key(unsigned char k, int x, int y)//esc key exit
 {
 	if (k == 27 || k == 'q')
 		exit(0);
@@ -48,6 +71,8 @@ int main(int argc, char** argv )
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowSize(640,480);
 	glutCreateWindow("Texture");
+
+	glutFullScreen();
 
 	glEnable(GL_TEXTURE_2D);
 
@@ -68,8 +93,8 @@ int main(int argc, char** argv )
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glTexImage2D(
     GL_TEXTURE_2D,
