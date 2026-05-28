@@ -5,6 +5,11 @@
 #include "stb_image.h"
 
 #include <cmath>
+#include <cstring>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+
 
 //#include <GL/freeglut.h>//nur windows 
 
@@ -65,8 +70,21 @@ void key(unsigned char k, int x, int y)//esc key exit
 		exit(0);
 }
 
-int main(int argc, char** argv )
-{
+ int main(int argc, char** argv )
+/* {
+char *path = getcwd(NULL, 0);
+
+    if (path) {
+        printf("%s\n", path);
+        free(path);
+    } else {
+        printf("getcwd");
+    }
+
+    return 0;
+}
+*/
+ {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowSize(640,480);
