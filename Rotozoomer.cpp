@@ -6,44 +6,54 @@
 
 #include <cmath>
 #include <cstring>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-
-
-//#include <GL/freeglut.h>//nur windows 
-
-//apple
-#include <OpenGL/gl.h>
-
-#include <GLUT/glut.h>
-
 #include <cstdio>
 #include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
+
+#ifdef _WIN32
+	#include <direct.h>
+	#define getcwd _getcwd
+#else
+	#include <unistd.h>
+#endif
+
+#ifdef _WIN32
+	#include <GL/freeglut.h>
+#elif defined(__APPLE__)
+	#include <OpenGL/gl.h>
+	#include <GLUT/glut.h>
+#else
+	#include <OpenGL/gl.h>
+	#include <GLUT/glut.h>
+#endif
 
 GLuint tex;
 
 //rotozoom
-float t = 0.0f;
+float animTime= 0.0f;
 
 void rotoTextCoord(float x, float y)
 {
-	float angle = t * 0.01f;
-	float zoom = 0.8f + 0.4f * sinf(t * 0.015f);
+	float angle = animTime * 0.60f;
+	float zoom = 0.78f + 0.15f * sinf(animTime * 0.90f);
 
-	float cx = 0.5f + 0.25f * sinf(t * 0.008f);
-	float cy = 0.5f + 0.25f * cosf(t * 0.011f);
+	float cx = 0.5f + 0.14f * sinf(animTime * 0.36f);
+	float cy = 0.5f + 0.14f * cosf(animTime * 0.48f);
 
 	float ca = cosf(angle);
 	float sa = sinf(angle);
 
 	float u = cx + (x * ca - y * sa) * zoom;
 	float v = cy + (x * sa + y * ca) * zoom;
+
 	glTexCoord2f(u, v);
 }
 
 void draw()
 {
+
+	animTime = glutGet(GLUT_ELAPSED_TIME) * 0.001f;
 
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear
@@ -60,7 +70,6 @@ void draw()
 		rotoTextCoord(-0.5f, -0.5f); glVertex2f(-1, 1);
 	glEnd();
 
-	t += 1.0f;
 	glutSwapBuffers();
 }
 
@@ -95,11 +104,13 @@ char *path = getcwd(NULL, 0);
 	glEnable(GL_TEXTURE_2D);
 
 	int w, h, c;
-	unsigned char* img = stbi_load("/Users/julius_munch/Documents/Code/Apple TV 1/Testbild.png",&w, &h, &c, 4);
-
+	unsigned char* img = stbi_load("Testbild.png", &w, &h, &c, 4);
 	if (!img)
 	{
 		printf("Konnte png nicht ladnen\n");
+		printf("STB Fehler: %s\n", stbi_failure_reason());
+		printf("Aktueller Arbeitsordner muss der Projektordner sein.\n");
+		getchar();
 		return 1;
 	}
 
