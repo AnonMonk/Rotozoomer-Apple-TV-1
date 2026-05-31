@@ -10,12 +10,19 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
+#include <limits.h>
 
 #ifdef _WIN32
+	#include <windows.h>
 	#include <direct.h>
 	#define getcwd _getcwd
 #else
 	#include <unistd.h>
+#endif
+
+#ifdef __APPLE__
+	#include <mach-o/dyld.h>
 #endif
 
 #ifdef _WIN32
@@ -79,6 +86,40 @@ void key(unsigned char k, int x, int y)//esc key exit
 		exit(0);
 }
 
+std::string getExecutableDir(char** argv)
+{
+#ifdef _WIN32
+	char path[MAX_PATH];
+
+	DWORD len = GetModuleFileNameA(NULL, path, MAX_PATH);
+	if (len > 0 && len < MAX_PATH) {
+		std::string fullPath = path;
+		size_t pos = fullPath.find_last_of("/\\");
+		if (pos != std::string::npos)
+			return fullPath.substr(0, pos);
+	}
+#endif
+
+#ifdef __APPLE__
+	char path[PATH_MAX];
+	uint32_t size = sizeof(path);
+
+	if (_NSGetExecutablePath(path, &size) == 0) {
+		std::string fullPath = path;
+		size_t pos = fullPath.find_last_of("/\\");
+		if (pos != std::string::npos)
+			return fullPath.substr(0, pos);
+	}
+#endif
+
+	std::string fallback = argv[0];
+	size_t pos = fallback.find_last_of("/\\");
+	if (pos != std::string::npos)
+		return fallback.substr(0, pos);
+
+	return ".";
+}
+
  int main(int argc, char** argv )
 /* {
 char *path = getcwd(NULL, 0);
@@ -104,12 +145,16 @@ char *path = getcwd(NULL, 0);
 	glEnable(GL_TEXTURE_2D);
 
 	int w, h, c;
-	unsigned char* img = stbi_load("Testbild.png", &w, &h, &c, 4);
+	std::string imagePath = getExecutableDir(argv) + "/Testbild.png";
+	printf("Lade Bild: %s\n", imagePath.c_str());
+
+	unsigned char* img = stbi_load(imagePath.c_str(), &w, &h, &c, 4);
 	if (!img)
 	{
 		printf("Konnte png nicht ladnen\n");
+		printf("Gesuchter Pfad: %s\n", imagePath.c_str());
 		printf("STB Fehler: %s\n", stbi_failure_reason());
-		printf("Aktueller Arbeitsordner muss der Projektordner sein.\n");
+		printf("Testbild.png muss im gleichen Ordner wie die Programmdatei liegen.\n");
 		getchar();
 		return 1;
 	}
