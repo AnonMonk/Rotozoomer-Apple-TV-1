@@ -1,2 +1,5 @@
 *.exe
 *.dll
+
+# macOS/Linux Binary
+Rotozoomer
