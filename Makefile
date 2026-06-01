@@ -1,9 +1,15 @@
-CXX=clang++
-TARGET=Rotozoomer
+.RECIPEPREFIX := >
+
+CXX=g++
+
+TARGET=Rotozoomer.exe
 SRC=Rotozoomer.cpp
 
+CXXFLAGS=-O2 -Wall
+LDFLAGS=-lfreeglut -lopengl32 -lglu32 -lm
+
 all:
-	$(CXX) $(SRC) -o $(TARGET) -std=c++17 -O2 -Wall -framework OpenGL -framework GLUT
+>$(CXX) $(CXXFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
 
 clean:
-	rm -f $(TARGET)
+>cmd /C if exist $(TARGET) del /Q $(TARGET)
