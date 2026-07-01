@@ -2,7 +2,7 @@
 # Projekt
 # =========================
 
-SRC = Rotozoomer.cpp
+SRC = Rotozoomer.cpp TunnelEffect.cpp
 NAME = Rotozoomer
 
 # Standardziel, falls kein TARGET angegeben wird
